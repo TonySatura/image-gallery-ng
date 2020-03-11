@@ -4,7 +4,6 @@ import { OverviewComponent } from './overview/overview.component';
 import { DetailsComponent } from './details/details.component';
 
 const routes: Routes = [
-    { path: '**', redirectTo: 'overview', pathMatch: 'full' },
     {
         path: 'overview',
         component: OverviewComponent,
@@ -13,7 +12,8 @@ const routes: Routes = [
     {
         path: 'album/:title',
         component: DetailsComponent
-    }
+    },
+    { path: '**', redirectTo: 'overview', pathMatch: 'full' }
 ];
 
 @NgModule({

@@ -2,14 +2,15 @@ import { Injectable } from '@angular/core';
 import * as AWS from 'aws-sdk/global';
 import * as S3 from 'aws-sdk/clients/s3';
 import { Observable, from } from 'rxjs';
-import { map, tap, catchError, flatMap } from 'rxjs/operators';
+import { map, tap, reduce } from 'rxjs/operators';
+import { AlbumModel } from '../models/album.model';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AlbumService {
-    private albumBucketName = 'tonomony-images';
-    private albumBucket: S3;
+    private bucketName = 'tonomony-images';
+    private bucket: S3;
 
     constructor() {
         // Initialize the Amazon Cognito credentials provider
@@ -19,29 +20,37 @@ export class AlbumService {
         });
 
         // Create a new service object
-        this.albumBucket = new S3({
+        this.bucket = new S3({
             apiVersion: '2006-03-01',
-            params: { Bucket: this.albumBucketName }
+            params: { Bucket: this.bucketName }
         });
     }
 
-    // A utility function to create HTML.
-    private getHtml(template) {
-        return template.join('\n');
-    }
-
-    // List the photo albums that exist in the bucket.
-    public listAlbums(): Observable<string[]> {
+    public listAlbumTitles(): Observable<AlbumModel[]> {
         const params = { Delimiter: '/' } as S3.ListObjectsRequest;
-
-        const promise = this.albumBucket.listObjects(params).promise();
+        const promise = this.bucket.listObjects(params).promise();
 
         return from(promise).pipe(
-            map(listObjects =>
-                listObjects.CommonPrefixes.map(commonPrefixes =>
-                    decodeURIComponent(commonPrefixes.Prefix.replace('/', ''))
-                )
-            )
+            map(objects => objects.CommonPrefixes.map(c => this.initAlbum(c))),
+            tap(response => console.log(response))
         );
+    }
+
+    // public listPhotos(albumName: string) {
+    //     const params = { Prefix: albumName + '/_' } as S3.ListObjectsRequest;
+    //     const promise = this.bucket.listObjects(params).promise();
+
+    //     const result = from(promise).pipe();
+
+    //     this.bucket.listObjects();
+    // }
+
+    private initAlbum(commonPrefix: S3.CommonPrefix) {
+        if (commonPrefix) {
+            return {
+                title: decodeURIComponent(commonPrefix.Prefix.replace('/', '')),
+                titleImageKey: ''
+            } as AlbumModel;
+        }
     }
 }

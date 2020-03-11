@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AlbumService } from '../services/album.service';
+import { AlbumModel } from '../models/album.model';
 
 @Component({
     selector: 'app-overview',
@@ -7,13 +8,13 @@ import { AlbumService } from '../services/album.service';
     styleUrls: ['./overview.component.scss']
 })
 export class OverviewComponent implements OnInit {
-    albums: string[];
+    albums: AlbumModel[];
 
     constructor(private albumService: AlbumService) {}
 
     ngOnInit() {
         this.albumService
-            .listAlbums()
+            .listAlbumTitles()
             .subscribe(albums => (this.albums = albums));
     }
 }

@@ -1,4 +1,4 @@
 <p>overview works!</p>
 <div *ngFor="let album of albums">
-    {{ album }}
+    <a [routerLink]="['/album', album.title]">{{ album.title }}</a>
 </div>
