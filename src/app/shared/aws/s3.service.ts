@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as AWS from 'aws-sdk/global';
 import * as S3 from 'aws-sdk/clients/s3';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
     providedIn: 'root'
@@ -11,16 +12,14 @@ export class S3Service {
     constructor() {
         this.buckets = new Map<string, S3>();
 
-        // TODO: put region and identity pool id to an config class
-
         // Initialize the Amazon Cognito credentials provider
-        AWS.config.region = 'eu-central-1'; // Region
+        AWS.config.region = environment.aws.region; // Region
         AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-            IdentityPoolId: 'eu-central-1:9b02f2ec-86ff-4ea1-b697-fab841a603b0'
+            IdentityPoolId: environment.aws.identityPoolId
         });
     }
 
-    public initS3Bucket(s3BucketName: string): S3 {
+    public initBucket(s3BucketName: string): S3 {
         let bucket = this.buckets.get(s3BucketName);
         if (!bucket) {
             bucket = new S3({

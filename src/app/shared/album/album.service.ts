@@ -14,7 +14,7 @@ export class AlbumService {
     constructor(private s3Service: S3Service) {}
 
     public listAlbums(request: ListAlbumsRequest): Observable<Album[]> {
-        const bucket = this.s3Service.initS3Bucket(request.s3BucketName);
+        const bucket = this.s3Service.initBucket(request.s3BucketName);
 
         const params = { Delimiter: '/' } as S3.ListObjectsRequest;
         const promise = bucket.listObjects(params).promise();
