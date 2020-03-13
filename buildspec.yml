@@ -11,4 +11,4 @@ phases:
     build:
         commands:
             # trigger production build
-            - ng run prodbuild
+            - npm run prodbuild
