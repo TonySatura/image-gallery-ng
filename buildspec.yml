@@ -12,3 +12,8 @@ phases:
         commands:
             # trigger production build
             - npm run prodbuild
+artifacts:
+    files:
+        - '**/*'
+    base-directory: 'dist*'
+    discard-paths: yes
