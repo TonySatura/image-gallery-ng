@@ -1,1 +1,4 @@
 <p>details works!</p>
+<div *ngFor="let img of images">
+    <img src="{{ img.imageUrl }}" alt="{{ img.description }}" />
+</div>

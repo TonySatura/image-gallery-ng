@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Album, ListAlbumsRequest } from '../shared/album/album.model';
 import { AlbumService } from '../shared/album/album.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'app-overview',
@@ -14,7 +15,7 @@ export class OverviewComponent implements OnInit {
 
     ngOnInit() {
         const request = {
-            s3BucketName: 'tonomony-images'
+            s3BucketName: environment.album.bucketName
         } as ListAlbumsRequest;
 
         this.albumService

@@ -30,4 +30,14 @@ export class S3Service {
         }
         return bucket;
     }
+
+    public getUrlFromBucket(s3Bucket: S3) {
+        return (
+            'https://' +
+            s3Bucket.config.params.Bucket +
+            '.s3-' +
+            s3Bucket.config.region +
+            '.amazonaws.com/'
+        );
+    }
 }
