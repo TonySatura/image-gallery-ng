@@ -14,9 +14,12 @@ https://aws.amazon.com/solutions/serverless-image-handler/
 ## Deployment
 
 1. Open CDK project [image-gallery-cdk](https://github.com/TonySatura/image-gallery-cdk) and compile TypeScript:
-   `$ npm run build`
+
+    `$ npm run build`
+
 2. Deploy an S3 bucket as image storage
-   `$ cdk deploy *-images -c branch=master`
+
+    `$ cdk deploy *-images -c branch=master`
 
     - Output:
         - [...]-images.bucketName = \*_-images-bucket[...]_
@@ -32,6 +35,8 @@ https://aws.amazon.com/solutions/serverless-image-handler/
         - Deploy DemoUI: _No_
 
 5. Open CDK project [image-gallery-cdk](https://github.com/TonySatura/image-gallerimage-gallery-cdky-cdk) and deploy web application infrastructure and CodePipeline
-   `$ cdk deploy *-ui,*-pipeline -c branch=master`
+
+    `$ cdk deploy *-ui,*-pipeline -c branch=master`
+
     - Output:
         - siteURL = https://[...].cloudfront.net
