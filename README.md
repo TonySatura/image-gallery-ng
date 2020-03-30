@@ -34,7 +34,9 @@ https://aws.amazon.com/solutions/serverless-image-handler/
         - SourceBuckets: _[...]-images.bucketName_ (see output step 2)
         - Deploy DemoUI: _No_
 
-5. Open CDK project [image-gallery-cdk](https://github.com/TonySatura/image-gallerimage-gallery-cdky-cdk) and deploy web application infrastructure and CodePipeline
+5. Enter output ApiEndpoint as _imageHandlerEndpoint_ to environment._prod_.ts of this Angular project.
+
+6. Open CDK project [image-gallery-cdk](https://github.com/TonySatura/image-gallerimage-gallery-cdky-cdk) and deploy web application infrastructure and CodePipeline
 
     `$ cdk deploy *-ui,*-pipeline -c branch=master`
 
