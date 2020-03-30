@@ -13,7 +13,7 @@ https://aws.amazon.com/solutions/serverless-image-handler/
 
 ## Deployment
 
-1. Open CDK project [image-gallery-cdk](https://github.com/TonySatura/image-gallerimage-gallery-cdky-cdk) and compile TypeScript:
+1. Open CDK project [image-gallery-cdk](https://github.com/TonySatura/image-gallery-cdk) and compile TypeScript:
    `$ npm run build`
 2. Deploy an S3 bucket as image storage
    `$ cdk deploy *-images -c branch=master`
