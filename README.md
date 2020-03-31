@@ -72,12 +72,15 @@ https://aws.amazon.com/solutions/serverless-image-handler/
 
     - Deploy web application infrastructure and CodePipeline
 
-        `$ cdk deploy *-ui,*-pipeline -c branch=master`
+        ```bash
+        $ cdk deploy *-ui -c branch=master
+        $ cdk deploy *-pipeline -c branch=master
+        ```
 
     - Output:
         - siteURL = https://[...].cloudfront.net
     - Wait until the pipeline deployed the Angular project to the bucket for the first time
-    - Visit the siteURL to test, if the application is working
+    - Visit the siteURL to test the web application
 
 ## About the web application
 
