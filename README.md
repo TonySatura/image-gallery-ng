@@ -13,32 +13,82 @@ https://aws.amazon.com/solutions/serverless-image-handler/
 
 ## Deployment
 
-1. Open CDK project [image-gallery-cdk](https://github.com/TonySatura/image-gallery-cdk) and compile TypeScript:
+1. Open CDK project [image-gallery-cdk](https://github.com/TonySatura/image-gallery-cdk)
 
-    `$ npm run build`
+    - compile TypeScript:
 
-2. Deploy an S3 bucket as image storage
+        `$ npm run build`
 
-    `$ cdk deploy *-images -c branch=master`
+    - Deploy an S3 bucket as image storage
+
+        `$ cdk deploy *-images -c branch=master`
 
     - Output:
-        - [...]-images.bucketName = \*_-images-bucket[...]_
-        - [...]-images.identityPoolId = _eu-central-1:[...]_
 
-3. Enter region and identityPoolId to environment._prod_.ts of this Angular project.
+        - [...]-images.bucketName = **\*_-images-bucket[...]_**
+        - [...]-images.identityPoolId = **_eu-central-1:[...]_**
 
-4. Deploy the AWS Serverless Image Handler CloudFormation stack
+    - Enter _bucketName_, _identityPoolId_ and _region_ to environment.ts (or .prod.ts) of this Angular project.
+        ```typescript
+        export const environment = {
+            production: false,
+            album: {
+                bucketName: '*-images-bucket[...]'
+                //imageHandlerEndpoint: ''
+            },
+            aws: {
+                region: 'eu-central-1',
+                identityPoolId: 'eu-central-1:[...]'
+            }
+        };
+        ```
+
+2. Deploy the AWS Serverless Image Handler CloudFormation stack
 
     - Execute [deploy script](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template?stackName=ServerlessImageHandler&templateURL=https:%2F%2Fs3.amazonaws.com%2Fsolutions-reference%2Fserverless-image-handler%2Flatest%2Fserverless-image-handler.template 'deploy script') in AWS console with parameters:
+
         - CorsEnabled: _Yes_
         - SourceBuckets: _[...]-images.bucketName_ (see output step 2)
         - Deploy DemoUI: _No_
 
-5. Enter output ApiEndpoint as _imageHandlerEndpoint_ to environment._prod_.ts of this Angular project.
+    - Enter output ApiEndpoint as _imageHandlerEndpoint_ to environment.ts (or .prod.ts) of this Angular project.
+        ```typescript
+        export const environment = {
+            production: false,
+            album: {
+                bucketName: '*-images-bucket[...]',
+                imageHandlerEndpoint: 'https://[...].cloudfront.net/'
+            },
+            aws: {
+                region: 'eu-central-1',
+                identityPoolId: 'eu-central-1:[...]'
+            }
+        };
+        ```
 
-6. Open CDK project [image-gallery-cdk](https://github.com/TonySatura/image-gallerimage-gallery-cdky-cdk) and deploy web application infrastructure and CodePipeline
+3. Commit and push the changes in the environment file(s) of this Angular project.
 
-    `$ cdk deploy *-ui,*-pipeline -c branch=master`
+4. Open CDK project [image-gallery-cdk](https://github.com/TonySatura/image-gallerimage-gallery-cdky-cdk)
+
+    - Deploy web application infrastructure and CodePipeline
+
+        `$ cdk deploy *-ui,*-pipeline -c branch=master`
 
     - Output:
         - siteURL = https://[...].cloudfront.net
+    - Wait until the pipeline deployed the Angular project to the bucket for the first time
+    - Visit the siteURL to test, if the application is working
+
+## About the web application
+
+### Route "overview"
+
+-   routes to OverviewComponent
+-   shows a list of links to the route "album"
+-   for each directory inside of the image bucket
+
+### Route "album"
+
+-   routes to DetailsComponent
+-   shows all images of a single directory in the image bucket
+-   displays 200x200 pixel thumbnails by using the Serverless Image Handler
