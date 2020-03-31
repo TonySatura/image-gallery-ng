@@ -1,9 +1,7 @@
-import { Injectable, Optional } from '@angular/core';
-
+import { Injectable } from '@angular/core';
 import { Observable, from } from 'rxjs';
-import { map, tap, filter } from 'rxjs/operators';
+import { map, tap, shareReplay, share } from 'rxjs/operators';
 import * as S3 from 'aws-sdk/clients/s3';
-
 import {
     Album,
     ListAlbumsRequest,
@@ -13,52 +11,82 @@ import {
     ImageHandlerEdits
 } from './album.model';
 import { S3Service } from '../aws/s3.service';
-import { S3Object } from 'aws-sdk/clients/rekognition';
-import { ifStmt } from '@angular/compiler/src/output/output_ast';
 import { environment } from 'src/environments/environment';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AlbumService {
+    private albumCacheService = new CacheService<
+        ListAlbumsRequest,
+        Observable<Array<Album>>
+    >();
+
+    private imageCacheService = new CacheService<
+        ListImagesRequest,
+        Observable<Array<Image>>
+    >();
+
     constructor(private s3Service: S3Service) {}
 
-    public listAlbums(request: ListAlbumsRequest): Observable<Album[]> {
-        const bucket = this.s3Service.initBucket(request.s3BucketName);
+    public listAlbums(request: ListAlbumsRequest): Observable<Array<Album>> {
+        let albumsObservable = this.albumCacheService.getFromCache(request);
 
-        const params = { Delimiter: '/' } as S3.ListObjectsRequest;
-        const promise = bucket.listObjects(params).promise();
+        if (!albumsObservable) {
+            const bucket = this.s3Service.initBucket(request.s3BucketName);
+            const params = { Delimiter: '/' } as S3.ListObjectsRequest;
+            const promise = bucket.listObjects(params).promise();
 
-        return from(promise).pipe(
-            map(output => output.CommonPrefixes.map(c => this.initAlbum(c))),
-            tap(response => console.log(response))
-        );
+            albumsObservable = from(promise).pipe(
+                map(output =>
+                    output.CommonPrefixes.map(c => this.initAlbum(c))
+                ),
+                tap(response => console.log(response)),
+                share()
+            );
+
+            this.albumCacheService.saveToCache(request, albumsObservable);
+        }
+
+        return albumsObservable;
     }
 
-    public listImages(request: ListImagesRequest): Observable<Image[]> {
-        const bucket = this.s3Service.initBucket(request.s3BucketName);
-        //var bucketUrl = this.s3Service.getUrlFromBucket(bucket);
+    public listImages(request: ListImagesRequest): Observable<Array<Image>> {
+        let imagesObservable = this.imageCacheService.getFromCache(request);
 
-        const params = {
-            Prefix: request.albumTitle + '/'
-        } as S3.ListObjectsRequest;
+        if (!imagesObservable) {
+            const bucket = this.s3Service.initBucket(request.s3BucketName);
+            // var bucketUrl = this.s3Service.getUrlFromBucket(bucket);
 
-        const promise = bucket.listObjects(params).promise();
+            const params = {
+                Prefix: request.albumTitle + '/'
+            } as S3.ListObjectsRequest;
 
-        return from(promise).pipe(
-            map(output =>
-                output.Contents.filter(object => object.Key != params.Prefix)
-                    .map(object => {
-                        return this.initImageHandler(
-                            request.s3BucketName,
-                            object,
-                            request.imageEdits
-                        );
-                    })
-                    .map(imageHandler => this.initImage(imageHandler))
-            ),
-            tap(response => console.log(response))
-        );
+            const promise = bucket.listObjects(params).promise();
+
+            imagesObservable = from(promise).pipe(
+                map(output =>
+                    output.Contents.filter(
+                        object => object.Key !== params.Prefix
+                    )
+                        .map(object => {
+                            return this.initImageHandler(
+                                request.s3BucketName,
+                                object,
+                                request.imageEdits
+                            );
+                        })
+                        .map(imageHandler => this.initImage(imageHandler))
+                ),
+                tap(response => console.log(response)),
+                share()
+            );
+
+            this.imageCacheService.saveToCache(request, imagesObservable);
+        }
+
+        return imagesObservable;
     }
 
     public generateImageUrl(image: ImageHandler): string {
@@ -86,7 +114,7 @@ export class AlbumService {
         object: S3.Object,
         edits: ImageHandlerEdits
     ): ImageHandler {
-        var imgHandler = {} as ImageHandler;
+        const imgHandler = {} as ImageHandler;
         imgHandler.bucket = bucket;
         imgHandler.key = object.Key;
 
@@ -99,18 +127,18 @@ export class AlbumService {
     }
 
     private initImage(imageHandler: ImageHandler) {
-        var headParams = {
+        const headParams = {
             Bucket: imageHandler.bucket
         };
 
-        var img = {} as Image;
-        img.fileName = imageHandler.key; //TODO: read without path from Head: https://stackoverflow.com/questions/42647016/aws-sdk-get-file-information
+        const img = {} as Image;
+        img.fileName = imageHandler.key; // TODO: read without path from Head: https://stackoverflow.com/questions/42647016/aws-sdk-get-file-information
         img.description = '';
 
         const str = JSON.stringify(imageHandler);
         const enc = btoa(str);
 
-        img.imageUrl = environment.album.imageHandlerEndpoint + enc;
+        img.imageUrl = environment.album.imageHandlerEndpoint + '/' + enc;
         return img;
     }
 }
