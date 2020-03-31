@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Album, ListAlbumsRequest } from '../shared/album/album.model';
-import { AlbumService } from '../shared/album/album.service';
 import { environment } from 'src/environments/environment';
+import { Album, ListAlbumsRequest } from '../../models/album.model';
+import { AlbumService } from '../../services/album.service';
 
 @Component({
     selector: 'app-overview',

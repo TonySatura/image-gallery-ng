@@ -1,19 +1,16 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { OverviewComponent } from './overview/overview.component';
-import { DetailsComponent } from './details/details.component';
 
 const routes: Routes = [
     {
-        path: 'overview',
-        component: OverviewComponent,
+        path: 'image-gallery',
+        loadChildren: () =>
+            import('./modules/image-gallery/image-gallery.module').then(
+                m => m.ImageGalleryModule
+            ),
         data: { pageTitle: 'Overview' }
     },
-    {
-        path: 'album/:title',
-        component: DetailsComponent
-    },
-    { path: '**', redirectTo: 'overview', pathMatch: 'full' }
+    { path: '**', redirectTo: 'image-gallery', pathMatch: 'full' }
 ];
 
 @NgModule({

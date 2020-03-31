@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, from } from 'rxjs';
-import { map, tap, shareReplay, share } from 'rxjs/operators';
+import { map, tap, share } from 'rxjs/operators';
 import * as S3 from 'aws-sdk/clients/s3';
 import {
     Album,
@@ -9,14 +9,12 @@ import {
     Image,
     ImageHandler,
     ImageHandlerEdits
-} from './album.model';
-import { S3Service } from '../aws/s3.service';
+} from '../models/album.model';
 import { environment } from 'src/environments/environment';
-import { CacheService } from '../cache/cache.service';
+import { CacheService } from '../../shared/services/cache.service';
+import { S3Service } from '../../shared/services/s3.service';
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable()
 export class AlbumService {
     private albumCacheService = new CacheService<
         ListAlbumsRequest,

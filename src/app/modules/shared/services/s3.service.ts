@@ -3,9 +3,7 @@ import * as AWS from 'aws-sdk/global';
 import * as S3 from 'aws-sdk/clients/s3';
 import { environment } from 'src/environments/environment';
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable()
 export class S3Service {
     private buckets: Map<string, S3>;
 

@@ -4,9 +4,9 @@ import {
     ListImagesRequest,
     Image,
     ImageHandlerFit
-} from '../shared/album/album.model';
-import { AlbumService } from '../shared/album/album.service';
+} from '../../models/album.model';
 import { environment } from 'src/environments/environment';
+import { AlbumService } from '../../services/album.service';
 
 @Component({
     selector: 'app-details',

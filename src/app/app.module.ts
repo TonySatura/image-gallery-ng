@@ -4,21 +4,16 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { OverviewComponent } from './overview/overview.component';
-import { DetailsComponent } from './details/details.component';
+import { ImageGalleryModule } from './modules/image-gallery/image-gallery.module';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    OverviewComponent,
-    DetailsComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FontAwesomeModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+    declarations: [AppComponent],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        FontAwesomeModule,
+        ImageGalleryModule
+    ],
+    bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}
