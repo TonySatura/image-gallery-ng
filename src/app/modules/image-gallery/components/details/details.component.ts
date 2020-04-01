@@ -4,9 +4,9 @@ import {
     ListImagesRequest,
     Image,
     ImageHandlerFit
-} from '../../models/album.model';
+} from '../../models/image.model';
 import { environment } from 'src/environments/environment';
-import { AlbumService } from '../../services/album.service';
+import { ImageService } from '../../services/image.service';
 
 @Component({
     selector: 'app-details',
@@ -18,7 +18,7 @@ export class DetailsComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
-        private albumService: AlbumService
+        private imageService: ImageService
     ) {}
 
     ngOnInit(): void {
@@ -34,7 +34,7 @@ export class DetailsComponent implements OnInit {
             }
         } as ListImagesRequest;
 
-        this.albumService
+        this.imageService
             .listImages(request)
             .subscribe(images => (this.images = images));
     }
