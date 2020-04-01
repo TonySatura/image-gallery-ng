@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-
 import { S3Service } from './s3.service';
 
 describe('AwsS3Service', () => {
