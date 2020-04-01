@@ -16,55 +16,40 @@ import { S3Service } from '../../aws/services/s3.service';
     providedIn: 'root'
 })
 export class ImageService {
-    constructor(private s3Service: S3Service) {}
-
-    private imageCacheService = new CacheService<
-        ListImagesRequest,
-        Observable<Array<Image>>
-    >();
+    constructor(
+        private s3Service: S3Service,
+        private cacheService: CacheService
+    ) {}
 
     public listImages(request: ListImagesRequest): Observable<Array<Image>> {
-        let imagesObservable = this.imageCacheService.getFromCache(request);
-
-        if (!imagesObservable) {
-            const bucket = this.s3Service.initBucket(request.s3BucketName);
-            // var bucketUrl = this.s3Service.getUrlFromBucket(bucket);
-
+        return this.cacheService.getObservable(request, r => {
+            const bucket = this.s3Service.initBucket(r.s3BucketName);
             const params = {
-                Prefix: request.albumTitle + '/'
+                Prefix: r.albumTitle + '/'
             } as S3.ListObjectsRequest;
 
             const promise = bucket.listObjects(params).promise();
-
-            imagesObservable = from(promise).pipe(
+            return from(promise).pipe(
                 map(output =>
                     output.Contents.filter(
                         object => object.Key !== params.Prefix
-                    )
-                        .map(object => {
-                            return this.initImageHandler(
-                                request.s3BucketName,
-                                object,
-                                request.imageEdits
-                            );
-                        })
-                        .map(imageHandler => this.initImage(imageHandler))
-                ),
-                tap(response => console.log(response)),
-                share()
+                    ).map(object => {
+                        return this.initImage(
+                            r.s3BucketName,
+                            object,
+                            r.imageEdits
+                        );
+                    })
+                )
             );
-
-            this.imageCacheService.saveToCache(request, imagesObservable);
-        }
-
-        return imagesObservable;
+        });
     }
 
-    private initImageHandler(
+    private initImage(
         bucket: string,
         object: S3.Object,
         edits: ImageHandlerEdits
-    ): ImageHandler {
+    ) {
         const imgHandler = {} as ImageHandler;
         imgHandler.bucket = bucket;
         imgHandler.key = object.Key;
@@ -73,20 +58,16 @@ export class ImageService {
             imgHandler.edits = edits;
         }
 
-        console.log(imgHandler);
-        return imgHandler as ImageHandler;
-    }
-
-    private initImage(imageHandler: ImageHandler) {
         const headParams = {
-            Bucket: imageHandler.bucket
+            Bucket: imgHandler.bucket
         };
 
+        // TODO: read without path from Head: https://stackoverflow.com/questions/42647016/aws-sdk-get-file-information
         const img = {} as Image;
-        img.fileName = imageHandler.key; // TODO: read without path from Head: https://stackoverflow.com/questions/42647016/aws-sdk-get-file-information
+        img.fileName = imgHandler.key;
         img.description = '';
 
-        const str = JSON.stringify(imageHandler);
+        const str = JSON.stringify(imgHandler);
         const enc = btoa(str);
 
         img.imageUrl = environment.album.imageHandlerEndpoint + '/' + enc;

@@ -1,34 +1,95 @@
-export class CacheService<RequestType, ResponseType> {
-    private cacheMap: Map<string, ResponseType>;
-    private expireDate: Date;
-    private expiresInMinutes: number;
+import { Injectable, Inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { share, tap } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
+import { CacheObject, CacheSettings } from '../models/cache.model';
+import { CACHE_SETTINGS } from './cache.config';
 
-    constructor(expiresInMinutes?: number) {
-        this.cacheMap = new Map<string, ResponseType>();
-        this.expiresInMinutes = expiresInMinutes ? expiresInMinutes : 10;
-    }
+@Injectable()
+export class CacheService {
+    private cacheMap: Map<string, CacheObject>;
+    private settings: CacheSettings;
 
-    private getCacheKey(request: RequestType) {
-        return btoa(JSON.stringify(request));
-    }
+    constructor(@Inject(CACHE_SETTINGS) settings: CacheSettings) {
+        this.settings = settings;
 
-    private resetExpireDate() {
-        this.expireDate = new Date();
-        this.expireDate.setMinutes(
-            this.expireDate.getMinutes() + this.expiresInMinutes
-        );
-    }
-
-    public getFromCache(request: RequestType): ResponseType {
-        if (new Date() < this.expireDate) {
-            const cacheKey = this.getCacheKey(request);
-            return this.cacheMap.get(cacheKey);
+        if (this.settings.enabled) {
+            this.cacheMap = new Map<string, CacheObject>();
         }
     }
 
-    public saveToCache(request: RequestType, response: ResponseType) {
-        const cacheKey = this.getCacheKey(request);
-        this.cacheMap.set(cacheKey, response);
-        this.resetExpireDate();
+    public getObservable<T, TResult>(
+        request: T,
+        cachedFunction: (r: T) => Observable<TResult>
+    ): Observable<TResult> {
+        let result: Observable<TResult> = this.loadFromCache<
+            T,
+            Observable<TResult>
+        >(request);
+
+        if (!result) {
+            result = cachedFunction(request).pipe(
+                tap(response => {
+                    if (!environment.production) {
+                        console.log(JSON.stringify(response));
+                    }
+                }),
+                share()
+            );
+
+            if (!environment.production) {
+                console.log('=== NOT FROM CACHE ===');
+            }
+
+            this.saveToCache<T, Observable<TResult>>(
+                request,
+                result,
+                this.settings.expiresInSeconds
+            );
+        }
+
+        return result;
+    }
+
+    private getCacheKey<T>(request: T) {
+        return btoa(JSON.stringify(request));
+    }
+
+    private loadFromCache<T, TResult>(request: T): TResult {
+        if (this.settings.enabled) {
+            const cacheKey = this.getCacheKey(request);
+            const cacheObject = this.cacheMap.get(cacheKey);
+
+            if (cacheObject) {
+                if (new Date() < cacheObject.expireDate) {
+                    return cacheObject.data;
+                } else {
+                    this.cacheMap.delete(cacheKey);
+                }
+            }
+        }
+    }
+
+    private saveToCache<T, TResult>(
+        request: T,
+        result: TResult,
+        expiresInSeconds: number
+    ) {
+        if (this.settings.enabled) {
+            const cacheKey = this.getCacheKey(request);
+
+            const cacheObject = {
+                data: result,
+                expireDate: this.calculateExpireDate(expiresInSeconds)
+            } as CacheObject;
+
+            this.cacheMap.set(cacheKey, cacheObject);
+        }
+    }
+
+    private calculateExpireDate(expiresInSeconds: number) {
+        const expireDate = new Date();
+        expireDate.setSeconds(expireDate.getSeconds() + expiresInSeconds);
+        return expireDate;
     }
 }
