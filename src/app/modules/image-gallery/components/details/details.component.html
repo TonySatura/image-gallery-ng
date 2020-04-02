@@ -1,4 +1,8 @@
-<p>details works!</p>
+<h1>{{ albumTitle }}</h1>
+<p>Album details</p>
+<p>
+    <a [routerLink]="['']">&lt; back</a>
+</p>
 <div *ngFor="let img of images">
     <img src="{{ img.imageUrl }}" alt="{{ img.description }}" />
 </div>

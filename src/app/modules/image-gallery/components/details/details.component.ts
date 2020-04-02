@@ -14,6 +14,7 @@ import { ImageService } from '../../services/image.service';
     styleUrls: ['./details.component.scss']
 })
 export class DetailsComponent implements OnInit {
+    albumTitle: string;
     images: Image[];
 
     constructor(
@@ -22,9 +23,11 @@ export class DetailsComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
+        this.albumTitle = this.route.snapshot.paramMap.get('title');
+
         const request = {
             s3BucketName: environment.album.bucketName,
-            albumTitle: this.route.snapshot.paramMap.get('title'),
+            albumTitle: this.albumTitle,
             imageEdits: {
                 resize: {
                     width: 200,
