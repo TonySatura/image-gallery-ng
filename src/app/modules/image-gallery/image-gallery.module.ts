@@ -7,13 +7,14 @@ import { ImageGalleryRoutingModule } from './image-gallery-routing.module';
 import { AwsModule } from '../aws/aws.module';
 import { CacheService } from '../shared/services/cache.service';
 import { CACHE_SETTINGS } from '../shared/services/cache.config';
-import { CacheSettings } from '../shared/models/cache.model';
+import { CacheSettings, CacheStorageType } from '../shared/models/cache.model';
 import { environment } from 'src/environments/environment';
 
 const IG_CACHE_SETTINGS: CacheSettings = {
     // overwrite environment defaults if applicable
     enabled: environment.cache.enabled,
-    expiresInSeconds: environment.cache.expiresInSeconds
+    expiresInSeconds: environment.cache.expiresInSeconds,
+    storageType: environment.cache.storageType
 };
 
 @NgModule({

@@ -1,3 +1,5 @@
+import { CacheStorageType } from 'src/app/modules/shared/models/cache.model';
+
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
@@ -14,7 +16,8 @@ export const environment = {
     },
     cache: {
         enabled: true, // false
-        expiresInSeconds: 10 * 60 // 10 minutes
+        expiresInSeconds: 10 * 60, // 10 minutes
+        storageType: CacheStorageType.IN_MEMORY
     }
 };
 

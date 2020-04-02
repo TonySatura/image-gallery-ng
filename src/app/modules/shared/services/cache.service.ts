@@ -1,20 +1,35 @@
 import { Injectable, Inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of, race } from 'rxjs';
 import { share, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { CacheObject, CacheSettings } from '../models/cache.model';
+import {
+    CacheObject,
+    CacheSettings,
+    ICacheStorage,
+    CacheStorageType
+} from '../models/cache.model';
 import { CACHE_SETTINGS } from './cache.config';
+import { InMemoryCacheStorage } from './in-memory-cache-storage';
+import { DomCacheStorage } from './dom-cache-storage';
 
 @Injectable()
 export class CacheService {
-    private cacheMap: Map<string, CacheObject>;
+    private storage: ICacheStorage;
     private settings: CacheSettings;
 
     constructor(@Inject(CACHE_SETTINGS) settings: CacheSettings) {
         this.settings = settings;
 
         if (this.settings.enabled) {
-            this.cacheMap = new Map<string, CacheObject>();
+            switch (this.settings.storageType) {
+                case CacheStorageType.LOCAL_STORAGE:
+                    this.storage = new DomCacheStorage();
+                    break;
+                default:
+                case CacheStorageType.IN_MEMORY:
+                    this.storage = new InMemoryCacheStorage();
+                    break;
+            }
         }
     }
 
@@ -22,33 +37,35 @@ export class CacheService {
         request: T,
         cachedFunction: (r: T) => Observable<TResult>
     ): Observable<TResult> {
-        let result: Observable<TResult> = this.loadFromCache<
-            T,
-            Observable<TResult>
-        >(request);
+        const result: TResult = this.loadFromCache<T, TResult>(request);
+        let observable: Observable<TResult>;
 
-        if (!result) {
-            result = cachedFunction(request).pipe(
+        if (result) {
+            observable = of(result);
+        } else {
+            if (!environment.production) {
+                console.log('=== NOT FROM CACHE ===');
+            }
+
+            observable = cachedFunction(request).pipe(
                 tap(response => {
                     if (!environment.production) {
-                        console.log(JSON.stringify(response));
+                        console.log(response);
                     }
                 }),
                 share()
             );
 
-            if (!environment.production) {
-                console.log('=== NOT FROM CACHE ===');
-            }
-
-            this.saveToCache<T, Observable<TResult>>(
-                request,
-                result,
-                this.settings.expiresInSeconds
-            );
+            observable.subscribe((r: TResult) => {
+                this.saveToCache<T, TResult>(
+                    request,
+                    r,
+                    this.settings.expiresInSeconds
+                );
+            });
         }
 
-        return result;
+        return observable;
     }
 
     private getCacheKey<T>(request: T) {
@@ -56,17 +73,9 @@ export class CacheService {
     }
 
     private loadFromCache<T, TResult>(request: T): TResult {
-        if (this.settings.enabled) {
+        if (this.storage) {
             const cacheKey = this.getCacheKey(request);
-            const cacheObject = this.cacheMap.get(cacheKey);
-
-            if (cacheObject) {
-                if (new Date() < cacheObject.expireDate) {
-                    return cacheObject.data;
-                } else {
-                    this.cacheMap.delete(cacheKey);
-                }
-            }
+            return this.storage.load<TResult>(cacheKey);
         }
     }
 
@@ -75,7 +84,7 @@ export class CacheService {
         result: TResult,
         expiresInSeconds: number
     ) {
-        if (this.settings.enabled) {
+        if (this.storage) {
             const cacheKey = this.getCacheKey(request);
 
             const cacheObject = {
@@ -83,7 +92,7 @@ export class CacheService {
                 expireDate: this.calculateExpireDate(expiresInSeconds)
             } as CacheObject;
 
-            this.cacheMap.set(cacheKey, cacheObject);
+            this.storage.save(cacheKey, cacheObject);
         }
     }
 

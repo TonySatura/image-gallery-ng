@@ -8,5 +8,15 @@ export interface CacheObject {
 export interface CacheSettings {
     enabled: bool;
     expiresInSeconds: number;
-    // TODO: implement storage type (alternativly cache in local storage)
+    storageType: CacheStorageType;
+}
+
+export interface ICacheStorage {
+    save(cacheKey: string, cacheObject: CacheObject);
+    load<TData>(cacheKey: string): TData;
+}
+
+export enum CacheStorageType {
+    IN_MEMORY,
+    LOCAL_STORAGE
 }
