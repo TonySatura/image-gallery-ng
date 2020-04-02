@@ -1,3 +1,5 @@
+import { CacheStorageType } from 'src/app/modules/shared/models/cache.model';
+
 export const environment = {
     production: true,
     album: {
@@ -10,6 +12,7 @@ export const environment = {
     },
     cache: {
         enabled: true,
-        expiresInSeconds: 10 * 60 // 10 minutes
+        expiresInSeconds: 10 * 60, // 10 minutes
+        storageType: CacheStorageType.LOCAL_STORAGE
     }
 };
