@@ -1,4 +1,4 @@
-import { CacheStorageType } from 'src/app/modules/shared/models/cache.model';
+import { CacheStorageType } from 'src/app/modules/cache/models/cache.model';
 
 export const environment = {
     production: true,

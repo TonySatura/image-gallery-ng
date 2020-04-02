@@ -16,4 +16,4 @@ import {
         }
     ]
 })
-export class SharedModule {}
+export class CacheModule {}
