@@ -17,7 +17,7 @@ export const environment = {
     cache: {
         enabled: true, // false
         expiresInSeconds: 10 * 60, // 10 minutes
-        storageType: CacheStorageType.IN_MEMORY
+        storageType: CacheStorageType.LOCAL_STORAGE
     }
 };
 

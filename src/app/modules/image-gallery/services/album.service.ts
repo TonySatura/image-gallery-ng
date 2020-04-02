@@ -10,18 +10,25 @@ import { S3Service } from '../../aws/services/s3.service';
     providedIn: 'root'
 })
 export class AlbumService {
-    constructor(private s3Service: S3Service) {}
+    constructor(
+        private s3Service: S3Service,
+        private cacheService: CacheService
+    ) {}
 
     public listAlbums(request: ListAlbumsRequest): Observable<Array<Album>> {
-        const bucket = this.s3Service.initBucket(request.s3BucketName);
-        const params = { Delimiter: '/' } as S3.ListObjectsRequest;
-        const promise = bucket.listObjects(params).promise();
+        return this.cacheService.getObservable(request, r => {
+            const bucket = this.s3Service.initBucket(request.s3BucketName);
+            const params = { Delimiter: '/' } as S3.ListObjectsRequest;
+            const promise = bucket.listObjects(params).promise();
 
-        return from(promise).pipe(
-            map(output => output.CommonPrefixes.map(c => this.initAlbum(c))),
-            tap(response => console.log(response)),
-            share()
-        );
+            return from(promise).pipe(
+                map(output =>
+                    output.CommonPrefixes.map(c => this.initAlbum(c))
+                ),
+                tap(response => console.log(response)),
+                share()
+            );
+        });
     }
 
     private initAlbum(commonPrefix: S3.CommonPrefix) {
