@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
     ListImagesRequest,
     Image,
@@ -7,6 +7,8 @@ import {
 } from '../../models/image.model';
 import { environment } from 'src/environments/environment';
 import { ImageService } from '../../services/image.service';
+import { Album } from '../../models/album.model';
+import { AlbumService } from '../../services/album.service';
 
 @Component({
     selector: 'app-details',
@@ -14,31 +16,51 @@ import { ImageService } from '../../services/image.service';
     styleUrls: ['./details.component.scss']
 })
 export class DetailsComponent implements OnInit {
-    albumTitle: string;
+    album: Album;
     images: Image[];
+    loadingProcess: number;
 
     constructor(
-        private route: ActivatedRoute,
+        private activeRoute: ActivatedRoute,
+        private router: Router,
+        private albumService: AlbumService,
         private imageService: ImageService
-    ) {}
+    ) {
+        this.loadingProcess = 0;
+    }
 
     ngOnInit(): void {
-        this.albumTitle = this.route.snapshot.paramMap.get('title');
-
-        const request = {
+        const getAlbumRequest = {
             s3BucketName: environment.album.bucketName,
-            albumTitle: this.albumTitle,
-            imageEdits: {
-                resize: {
-                    width: 200,
-                    height: 200,
-                    fit: ImageHandlerFit.COVER
-                }
-            }
-        } as ListImagesRequest;
+            albumTitle: this.activeRoute.snapshot.paramMap.get('title')
+        };
 
-        this.imageService
-            .listImages(request)
-            .subscribe(images => (this.images = images));
+        this.albumService.getAlbum(getAlbumRequest).subscribe(album => {
+            if (!album) {
+                this.router.navigate(['']);
+            } else {
+                this.album = album;
+                this.loadingProcess = 20;
+
+                const listImagesRequest = {
+                    s3BucketName: this.album.s3BucketName,
+                    albumTitle: this.album.title,
+                    imageEdits: {
+                        resize: {
+                            width: 200,
+                            height: 200,
+                            fit: ImageHandlerFit.COVER
+                        }
+                    }
+                } as ListImagesRequest;
+
+                this.imageService
+                    .listImages(listImagesRequest)
+                    .subscribe(images => {
+                        this.images = images;
+                        this.loadingProcess = 100;
+                    });
+            }
+        });
     }
 }

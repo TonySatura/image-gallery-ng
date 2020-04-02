@@ -15,8 +15,8 @@ export const environment = {
         identityPoolId: 'eu-central-1:0b698247-b5cd-4975-a9cc-6db279d41a9a'
     },
     cache: {
-        enabled: false, // false
-        expiresInSeconds: 10 * 60, // 10 minutes
+        enabled: true,
+        expiresInSeconds: 1 * 60, // 1 minute
         storageType: CacheStorageType.LOCAL_STORAGE
     }
 };

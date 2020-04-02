@@ -9,3 +9,8 @@ export interface Album {
 export interface ListAlbumsRequest {
     s3BucketName: string;
 }
+
+export interface GetAlbumRequest {
+    s3BucketName: string;
+    albumTitle: string;
+}
