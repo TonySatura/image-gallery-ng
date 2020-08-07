@@ -1,12 +1,10 @@
-import { bool } from 'aws-sdk/clients/signer';
-
 export interface CacheObject {
     data: any;
     expireDate?: Date;
 }
 
 export interface CacheSettings {
-    enabled: bool;
+    enabled: boolean;
     expiresInSeconds: number;
     storageType: CacheStorageType;
 }
@@ -18,5 +16,5 @@ export interface ICacheStorage {
 
 export enum CacheStorageType {
     IN_MEMORY,
-    LOCAL_STORAGE
+    LOCAL_STORAGE,
 }
