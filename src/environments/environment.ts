@@ -1,4 +1,4 @@
-import { CacheStorageType } from 'src/app/modules/shared/models/cache.model';
+import { CacheStorageType } from 'src/app/modules/cache/models/cache.model';
 
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.

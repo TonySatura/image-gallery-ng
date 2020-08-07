@@ -9,7 +9,7 @@ import {
 } from '../models/image.model';
 import { Observable, from } from 'rxjs';
 import { map, tap, share } from 'rxjs/operators';
-import { CacheService } from '../../shared/services/cache.service';
+import { CacheService } from '../../cache/services/cache.service';
 import { S3Service } from '../../aws/services/s3.service';
 
 @Injectable({

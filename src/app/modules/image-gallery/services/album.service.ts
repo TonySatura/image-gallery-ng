@@ -7,7 +7,7 @@ import {
     ListAlbumsRequest,
     GetAlbumRequest
 } from '../models/album.model';
-import { CacheService } from '../../shared/services/cache.service';
+import { CacheService } from '../../cache/services/cache.service';
 import { S3Service } from '../../aws/services/s3.service';
 
 @Injectable({

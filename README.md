@@ -68,7 +68,7 @@ https://aws.amazon.com/solutions/serverless-image-handler/
 
 3. Commit and push the changes in the environment file(s) of this Angular project.
 
-4. Open CDK project [image-gallery-cdk](https://github.com/TonySatura/image-gallerimage-gallery-cdky-cdk)
+4. Open CDK project [image-gallery-cdk](https://github.com/TonySatura/image-gallery-cdk)
 
     - Deploy web application infrastructure and CodePipeline
 
