@@ -6,15 +6,17 @@ const routes: Routes = [
         path: 'image-gallery',
         loadChildren: () =>
             import('./modules/image-gallery/image-gallery.module').then(
-                m => m.ImageGalleryModule
+                (m) => m.ImageGalleryModule
             ),
-        data: { pageTitle: 'Overview' }
+        data: { pageTitle: 'Overview' },
     },
-    { path: '**', redirectTo: 'image-gallery', pathMatch: 'full' }
+    { path: '**', redirectTo: 'image-gallery', pathMatch: 'full' },
 ];
 
 @NgModule({
-    imports: [RouterModule.forRoot(routes, { relativeLinkResolution: 'legacy' })],
-    exports: [RouterModule]
+    imports: [
+        RouterModule.forRoot(routes, { relativeLinkResolution: 'corrected' }),
+    ],
+    exports: [RouterModule],
 })
 export class AppRoutingModule {}
